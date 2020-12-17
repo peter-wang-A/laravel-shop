@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\PagesController;
 use Illuminate\Support\Facades\Route;
-use Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +15,12 @@ use Auth;
 |
 */
 
-Route::get('/', [PagesController::class, "root"])->name('root');
+Route::get('/', 'PagesController@root')->name('root');
+
+Route::group(['middleware' => ['auth', 'verified']], function () {
+    Route::get('/user_addresses', 'UserAddressesController@index')->name('user_addresses.index');
+});
+
+
 
 Auth::routes(['verify' => true]);
