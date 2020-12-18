@@ -11,6 +11,7 @@
     },
     "devDependencies": {
         "axios": "^0.19",
+        "babel-plugin-import": "^1.13.3",
         "bootstrap": "^4.0.0",
         "cross-env": "^7.0.3",
         "jquery": "^3.2",
@@ -19,8 +20,13 @@
         "popper.js": "^1.12",
         "resolve-url-loader": "^2.3.1",
         "sass": "^1.20.1",
-        "sass-loader": "^7.0.3",
-        "vue": "^2.5.17",
+        "sass-loader": "^6.0.7",
+        "vue": "^2.6.12",
         "vue-template-compiler": "^2.6.10"
+    },
+    "dependencies": {
+        "china-area-data": "^5.0.1",
+        "node-sass": "^4.0.0",
+        "vant": "^2.11.2"
     }
 }

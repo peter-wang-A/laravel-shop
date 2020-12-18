@@ -2,10 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserAddressRequest;
+use App\Models\UserAddress;
+use Illuminate\Cache\Repository;
 use Illuminate\Http\Request;
+use SebastianBergmann\Environment\Console;
+use App\Repositories\UserAddressesPository;
 
 class UserAddressesController extends Controller
 {
+    protected $repo;
+    public function __construct(UserAddressesPository $repos)
+    {
+        $this->repo = $repos;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +23,7 @@ class UserAddressesController extends Controller
      */
     public function index(Request $request)
     {
-        $addresses = $request->user()->addresses()->paginate (7);
+        $addresses = $request->user()->addresses()->orderBy('id', 'desc')->paginate(7);
         return view('user_addresses.index', compact('addresses'));
     }
 
@@ -22,9 +32,10 @@ class UserAddressesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $userAddress = new UserAddress();
+        return view('user_addresses.create_and_edit', compact('userAddress'));
     }
 
     /**
@@ -33,11 +44,11 @@ class UserAddressesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserAddressRequest $request)
     {
-        //
+        $this->repo->addAddress($request);
+        return response()->json(['code' => 200, 'data' => '保存成功', 'route' => route('user_addresses.index')]);
     }
-
     /**
      * Display the specified resource.
      *
