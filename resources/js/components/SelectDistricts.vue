@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="card-header">
-      <h2 class="text-center">新增收货地址</h2>
+      <h2 class="text-center">{{ isUpdate ? "修改" : "新增" }}收货地址</h2>
     </div>
     <div class="card-body">
       <form class="form-horizontal" role="form">
@@ -47,10 +47,9 @@ import { Hub } from "./../event-bus";
 export default {
   name: "",
   props: {
-    // initValue: {
-    //   type: Array,
-    //   default: [],
-    // },
+    childAddress: {
+      type: Object,
+    },
   },
   data() {
     return {
@@ -60,9 +59,31 @@ export default {
       provinceId: "", //当前选中省
       cityId: "", //当前权重的市
       districtId: "", //当前选中的区
+      isUpdate: false,
     };
   },
-  created() {},
+  created() {
+    //填充赏已选项，先判断如果是修改在执行循环
+    if (this.childAddress.province) {
+      this.isUpdate = true;
+      document.title = "修改收货地址";
+      this.getAddressData(
+        addressData["86"],
+        this.childAddress.province,
+        "provinceId"
+      );
+      this.getAddressData(
+        addressData[this.provinceId],
+        this.childAddress.city,
+        "city"
+      );
+      this.getAddressData(
+        addressData[this.cityId],
+        this.childAddress.district,
+        "district"
+      );
+    }
+  },
   //定义观察器
   watch: {
     //当选择省发生变化时间触发
@@ -100,14 +121,6 @@ export default {
     },
     districtId(newId) {
       if (newId) {
-        let selectedAddressData = [
-          { province: addressData["86"][this.provinceId], id: this.provinceId },
-          { city: addressData[this.provinceId][this.cityId], id: this.cityId },
-          {
-            district: addressData[this.cityId][this.districtId],
-            id: this.districtId,
-          },
-        ];
         let selectedProvinceData = this.setData(
           "district",
           this.cityId,
@@ -118,6 +131,27 @@ export default {
     },
   },
   methods: {
+    //获取省市区 ID
+    getAddressData(allAddress, addressName, name) {
+      let a = 1;
+      for (let key in allAddress) {
+        if (allAddress[key] === addressName) {
+          if (name === "provinceId") {
+            this.provinceId = key;
+            break;
+          }
+          if (name === "city") {
+            this.cityId = key;
+            break;
+          }
+          if (name === "district") {
+            this.districtId = key;
+            break;
+          }
+        }
+        console.log(a++);
+      }
+    },
     setData(name, val1, id) {
       return { name: addressData[val1][id], id: id };
     },

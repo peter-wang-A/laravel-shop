@@ -34,8 +34,8 @@ class UserAddressesController extends Controller
      */
     public function create(Request $request)
     {
-        $userAddress = new UserAddress();
-        return view('user_addresses.create_and_edit', compact('userAddress'));
+        $address =new class{};
+        return view('user_addresses.create_and_edit', compact('address'));
     }
 
     /**
@@ -55,9 +55,9 @@ class UserAddressesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(UserAddress $user_address)
     {
-        //
+
     }
 
     /**
@@ -66,10 +66,11 @@ class UserAddressesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(UserAddress $user_address)
     {
-        //
+        return view('user_addresses.create_and_edit', ['address'=>$user_address]);
     }
+
 
     /**
      * Update the specified resource in storage.

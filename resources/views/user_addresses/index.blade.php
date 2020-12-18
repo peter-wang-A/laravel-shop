@@ -26,7 +26,7 @@
                                     <td>{{ $item->zip }}</td>
                                     <td>{{ $item->contact_phone }}</td>
                                     <td>
-                                        <button class="btn btn-primary">修改</button>
+                                        <button class="btn btn-primary"><a href="{{route('user_addresses.edit',$item->id)}}">修改</a></button>
                                         <button class="btn btn-danger">删除</button>
                                     </td>
                                 </tr>

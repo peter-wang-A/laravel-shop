@@ -4,7 +4,7 @@
       <div class="col-md-10 offset-lg-1">
         <div class="card">
           <!-- 输出后端报错开始 -->
-          <select-districts @address="addressData"> </select-districts>
+          <select-districts :childAddress="childAddress"> </select-districts>
           <form class="form-horizontal" role="form" method="post">
             <!-- <input type="hidden" name="province" value="{{csrf-token}}" /> -->
             <input type="hidden" name="province" v-model="province" />
@@ -85,6 +85,11 @@ import { Toast } from "vant";
 Vue.use(Toast);
 export default {
   name: "",
+  props: {
+    addresses: {
+      type: Object,
+    },
+  },
   components: {
     SelectDistricts,
   },
@@ -97,9 +102,20 @@ export default {
       contact_name: "", //收货人姓名
       zip: "", //收货人邮编
       contact_phone: "", //收货人电话
+      childAddress:{}
     };
   },
   created() {
+    this.address = this.addresses.address;
+    this.contact_name = this.addresses.contact_name;
+    this.zip = this.addresses.zip;
+    this.contact_phone = this.addresses.contact_phone;
+    let updateAddress = {
+        province:this.addresses.province,
+        city:this.addresses.city,
+        district:this.addresses.district,
+    }
+    this.childAddress=updateAddress
   },
   mounted() {
     this.addressData();
@@ -150,16 +166,6 @@ export default {
         Toast("请填电话");
         return;
       }
-      //   console.log(this.zip.match(/^[1-9]\\d{5}$/))
-      //   if (!this.zip.match(/^[1-9]\\d{5}$/)) {
-      //     Toast("请输入6位数字邮编");
-      //     return;
-      //   }
-      //   if (!this.contact_phone.match(/^[1-9]\\d{10}$/)) {
-      //     Toast("请输入正确的手机号");
-      //     return;
-      //   }
-
       //提交数据
       axios
         .post("/user_addresses/store", {
@@ -173,9 +179,9 @@ export default {
         })
         .then((res) => {
           if (res.data.code === 200) {
-              console.log(res.data)
+            console.log(res.data);
             Toast(res.data.data);
-            location.href=res.data.route
+            location.href = res.data.route;
           }
         });
     },
