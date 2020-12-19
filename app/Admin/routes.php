@@ -16,4 +16,13 @@ Route::group([
 
     //商品后台
     $router->get('products', 'ProductsController@index');
+    $router->get('products/create', 'ProductsController@create');
+    $router->post('products', 'ProductsController@store');
+
+    //修改商品
+    $router->get('products/{id}/edit', 'ProductsController@edit');
+
+    // $router->get('products/{id}/edit', 'ProductsController@edit');
+$router->put('products/{id}', 'ProductsController@update');
+
 });

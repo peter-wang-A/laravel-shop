@@ -19,6 +19,6 @@ class Product extends Model
     //定义模型关系,一个商品有多个 SKU
     public function skus()
     {
-        $this->hanMany(ProductSku::class);
+        return $this->hasMany(ProductSku::class);
     }
 }

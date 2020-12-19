@@ -37,6 +37,7 @@ class UsersController extends AdminController
             return $value ? '是' : '否';
         });
         $grid->created_at('注册时间');
+        $grid->updated_at('修改时间');
 
 
          // 不在页面显示 `新建` 按钮，因为我们不需要在后台新建用户

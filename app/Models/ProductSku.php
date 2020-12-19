@@ -7,12 +7,10 @@ use App\Models\Product;
 
 class ProductSku extends Model
 {
-    protected $fillable = [
-        'title', 'description', 'price', 'stock'
-    ];
+    protected $fillable = ['title', 'description', 'price', 'stock'];
 
     public function product()
     {
-        $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class);
     }
 }
