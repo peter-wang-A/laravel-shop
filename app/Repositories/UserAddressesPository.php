@@ -14,4 +14,16 @@ class  UserAddressesPository{
             'contact_phone',
         ]));
     }
+
+    public function updateAddress($request,$id){
+       return $request->user()->addresses()->where('id',$id)->update($request->only([
+            'province',
+            'city',
+            'district',
+            'address',
+            'zip',
+            'contact_name',
+            'contact_phone',
+        ]));
+    }
 }

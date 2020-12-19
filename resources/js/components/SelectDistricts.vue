@@ -133,7 +133,6 @@ export default {
   methods: {
     //获取省市区 ID
     getAddressData(allAddress, addressName, name) {
-      let a = 1;
       for (let key in allAddress) {
         if (allAddress[key] === addressName) {
           if (name === "provinceId") {
@@ -149,7 +148,6 @@ export default {
             break;
           }
         }
-        console.log(a++);
       }
     },
     setData(name, val1, id) {

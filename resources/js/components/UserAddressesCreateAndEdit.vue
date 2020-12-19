@@ -102,7 +102,7 @@ export default {
       contact_name: "", //收货人姓名
       zip: "", //收货人邮编
       contact_phone: "", //收货人电话
-      childAddress:{}
+      childAddress: {},
     };
   },
   created() {
@@ -111,11 +111,12 @@ export default {
     this.zip = this.addresses.zip;
     this.contact_phone = this.addresses.contact_phone;
     let updateAddress = {
-        province:this.addresses.province,
-        city:this.addresses.city,
-        district:this.addresses.district,
-    }
-    this.childAddress=updateAddress
+      province: this.addresses.province,
+      city: this.addresses.city,
+      district: this.addresses.district,
+    };
+    this.childAddress = updateAddress;
+    // console.log(this.province)
   },
   mounted() {
     this.addressData();
@@ -166,9 +167,18 @@ export default {
         Toast("请填电话");
         return;
       }
-      //提交数据
+      //添加收货地址
+      if (Object.keys(this.addresses).length <= 0) {
+        this.addressPost("/user_addresses/store");
+      } else {
+        this.addressPost("/user_addresses/" + this.addresses.id + "/update");
+      }
+    },
+
+    // post请求
+    addressPost(url) {
       axios
-        .post("/user_addresses/store", {
+        .post(url, {
           province: this.province,
           city: this.city,
           district: this.district,
@@ -179,7 +189,6 @@ export default {
         })
         .then((res) => {
           if (res.data.code === 200) {
-            console.log(res.data);
             Toast(res.data.data);
             location.href = res.data.route;
           }

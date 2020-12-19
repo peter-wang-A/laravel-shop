@@ -34,7 +34,7 @@ class UserAddressesController extends Controller
      */
     public function create(Request $request)
     {
-        $address =new class{};
+        $address = new class{};
         return view('user_addresses.create_and_edit', compact('address'));
     }
 
@@ -57,7 +57,6 @@ class UserAddressesController extends Controller
      */
     public function show(UserAddress $user_address)
     {
-
     }
 
     /**
@@ -68,7 +67,8 @@ class UserAddressesController extends Controller
      */
     public function edit(UserAddress $user_address)
     {
-        return view('user_addresses.create_and_edit', ['address'=>$user_address]);
+        $this->authorize('own',$user_address);
+        return view('user_addresses.create_and_edit', ['address' => $user_address]);
     }
 
 
@@ -79,9 +79,11 @@ class UserAddressesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UserAddress $user_address,Request $request)
     {
-        //
+        $this->authorize('own',$user_address);
+        $this->repo->updateAddress($request, $user_address->id);
+        return response()->json(['code' => 200, 'data' => '修改成功', 'route' => route('user_addresses.index')]);
     }
 
     /**
@@ -90,8 +92,15 @@ class UserAddressesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(UserAddress $user_address)
     {
-        //
+        $this->authorize('own',$user_address);
+        // dd($user_address);
+        $user_address->delete();
+        // return redirect()->route('user_addresses.index');
+        return response()->json([
+            'code' => 200,
+            'data' => '删除成功'
+        ]);
     }
 }
