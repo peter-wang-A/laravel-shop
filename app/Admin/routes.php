@@ -10,7 +10,10 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
 ], function (Router $router) {
 
+    //用户后台
     $router->get('/', 'HomeController@index');
     $router->get('users', 'UsersController@index');
 
+    //商品后台
+    $router->get('products', 'ProductsController@index');
 });
