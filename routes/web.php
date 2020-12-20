@@ -29,5 +29,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
 });
 
 
-
 Auth::routes(['verify' => true]);
+
+//商品展示
+Route::prefix('products')->group(function () {
+    Route::get('index', 'ProductsController@index')->name('products.index');
+});
