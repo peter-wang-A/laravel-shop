@@ -7,7 +7,7 @@ use App\Models\Product;
 
 class ProductSku extends Model
 {
-    protected $fillable = ['title', 'description', 'price', 'stock'];
+    protected $fillable = ['title', 'description', 'price', 'stock','sku_category'];
 
     public function product()
     {

@@ -4,55 +4,42 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Repositories\ProductsPositoryInterface;
+use App\Repositories\ProductsPository;
 
 class ProductsController extends Controller
 {
+
+    protected $repo;
+
+    public function __construct(ProductsPositoryInterface $repo)
+    {
+        $this->repo = $repo;
+    }
+
+    // 商品首页
     public function index(Request $request)
     {
-        //创建一个查询构造器
-        $builder =  Product::query()->where('on_sale', true);
-
-        //判断是否有传参数
-        if ($search = $request->input('search', '')) {
-            /**
-             * 如果有传参数则进行查询
-             * 设置为模糊查询，包含字段的都查出来
-             * orWhereHas 关联查询
-             * 模糊搜索商品标题、商品详情、SKU 标题、SKU描述
-             */
-            $like = "%" . $search . "%";
-
-            $builder->where(function ($query) use ($like) {
-                $query->where('title', 'like', $like)
-                    ->orWhere('discription', 'like', $like)
-                    ->orWhereHas('skus', function ($query) use ($like) {
-                        $query->where('title', 'like', $like)
-                            ->orWhere('description', 'like', $like);
-                    });
-            });
-        }
-        /**
-         * 是否有order 参数，如果有就给 $order 变量
-         */
-        if ($order = $request->input('order', '')) {
-
-            if (preg_match('/^(.+)_(asc|desc)$/', $order, $m)) {
-                // dd($m[1]);
-                if (in_array($m[1], ['sold_count', 'rating', 'price'])) {
-                    //根数传入的参数来查询
-                    $builder->orderBy($m[1], $m[2]);
-                }
-            }
-        }
-
-        $products = $builder->paginate(16);
-
+        $products =   $this->repo->productsData($request);
         return view('products.index', [
-            'products' => $products,
+            'products' => $products['products'],
             'filters' => [
-                'search' => $search,
-                'order' => $order
+                'search' => $products['search'],
+                'order' => $products['order']
             ]
         ]);
+    }
+
+    //商品详情页面
+
+    public function show(Product $product, Request $request)
+    {
+        // dd($product->id);
+        // 判断商品是否已经上架，如果没有上架则抛出异常。
+        if (!$product->on_sale) {
+            throw new \Exception('商品未上架');
+        }
+
+        return view('products.show', ['product'=>$product]);
     }
 }

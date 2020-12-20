@@ -34,4 +34,5 @@ Auth::routes(['verify' => true]);
 //商品展示
 Route::prefix('products')->group(function () {
     Route::get('index', 'ProductsController@index')->name('products.index');
+    Route::get('/{product}', 'ProductsController@show')->name('products.show');
 });
