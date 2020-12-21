@@ -50,4 +50,24 @@ class  ProductsPository implements ProductsPositoryInterface
         $data = ['products' => $products, 'search' => $search, 'order' => $order];
         return $data;
     }
+
+    //收藏商品
+    public function favor($product, $request)
+    {
+        //获取当前用户
+        $user = $request->user();
+        //判断用户是否收藏了此商品，如果收藏了什么都不做
+        if ($user->favoriteProducts()->find($product->id)) {
+            return;
+        }
+        //否则收藏此商品
+        $user->favoriteProducts()->attach($product);
+    }
+
+    //取消收藏
+    public function disfavor($product, $request)
+    {
+        $user = $request->user();
+        $user->favoriteProducts()->detach($product->id);
+    }
 }

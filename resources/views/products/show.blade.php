@@ -65,7 +65,11 @@
                 <span class="stock" id="productStok"></span>
             </div>
             <div class="buttons">
-              <button class="btn btn-success btn-favor">❤ 收藏</button>
+                @if($favored)
+                <button class="btn btn-danger btn-disfavor" id="btn-disfavor">取消收藏</button>
+              @else
+                <button class="btn btn-success btn-favor" id="btn-favor">❤ 收藏</button>
+              @endif
               <button class="btn btn-primary btn-add-to-cart">加入购物车</button>
             </div>
           </div>
@@ -97,6 +101,9 @@
     <script>
         var product = {!! json_encode($product) !!}
         var productPrice = Number(product.price);
+        var isFavor = Boolean({{$favored}})
+
+
         $(document).ready(function(){
             //选中默认属性
             var skuPrice = Number($('.sku-btn').data('price'));
@@ -109,6 +116,41 @@
                 $('#productPrice').text($(this).data('price'));
                 $('#productStok').text('库存：'+$(this).data('stock')+' 件');
             })
+
+            //收藏
+                $('#btn-favor').click(function(){
+                    location.reload()
+                        axios.post('{{route('products.favor',['product'=>$product->id])}}').then(res=>{
+                            if(res.data.code==200){
+                                swal(res.data.msg, '', 'success').then(()=>{
+                                    location.reload()
+                                });
+
+                            }
+                        }).catch(res=>{
+                            // 如果返回码是 401 代表没登录
+                            if (res.response && res.response.status === 500) {
+                                location.href='/login'
+                            } else if (res.response && (res.response.data.msg || res.response.data.message)) {
+                                // 其他有 msg 或者 message 字段的情况，将 msg 提示给用户
+                                swal(res.response.data.msg ? res.response.data.msg : res.response.data.message, '', 'error');
+                            }  else {
+                                // 其他情况应该是系统挂了
+                                swal('系统错误', '', 'error');
+                            }
+                        })
+                    })
+                    //取消收藏
+                    $('#btn-disfavor').click(function(){
+                                axios.post('{{route('products.disfavor',['product'=>$product->id])}}').then(res=>{
+                                    if(res.data.code==200){
+                                        swal(res.data.msg, '', 'success').then(()=>{
+                                            location.reload()
+                                        });
+
+                                    }
+                                })
+                            })
         })
     </script>
 @endsection
