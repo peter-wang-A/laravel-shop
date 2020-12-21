@@ -88,7 +88,7 @@ class ProductsController extends AdminController
             $form->text('price', '单价')->rules('required|numeric|min:0.01');
             $form->text('stock', '剩余库存')->rules('required|integer|min:0');
             $form->select('sku_category', 'sku 类别')->options(
-                ['1' => '是', '2' => '否']
+                ['1' => '颜色', '2' => '尺码']
             );
         });
 

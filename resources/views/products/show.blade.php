@@ -20,20 +20,43 @@
               <div class="rating" title="评分 {{ $product->rating }}">评分 <span class="count">{{ str_repeat('★', floor($product->rating)) }}{{ str_repeat('☆', 5 - floor($product->rating)) }}</span></div>
             </div>
             <div class="skus">
-              <label>选择</label>
-              <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                @foreach($product->skus as $sku)
-                  <label
-                  class="btn sku-btn"
-                  data-price="{{$sku->price}}"
-                  data-stock="{{$sku->stock}}"
-                  data-toggle="tooltip"
-                  title="{{ $sku->description }}"
-                  data-placement="bottom">
-                    <input  type="radio" name="skus"  autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
-                  </label>
-                @endforeach
-              </div>
+              <template>
+                <label>颜色:</label>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  @foreach($product->skus as $sku)
+                  @if($sku->sku_category == 1)
+                    <label
+                    class="btn sku-btn"
+                    data-price="{{$sku->price}}"
+                    data-stock="{{$sku->stock}}"
+                    data-toggle="tooltip"
+                    title="{{ $sku->description }}"
+                    data-placement="bottom">
+                      <input  type="radio" name="skus"  autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
+                    </label>
+                    @endif
+                  @endforeach
+                </div>
+              </template>
+              <template>
+                <label>尺码:</label>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  @foreach($product->skus as $sku)
+                  @if($sku->sku_category == 2)
+                    <label
+                    class="btn sku-btn"
+                    data-price="{{$sku->price}}"
+                    data-stock="{{$sku->stock}}"
+                    data-toggle="tooltip"
+                    title="{{ $sku->description }}"
+                    data-placement="bottom">
+                      <input  type="radio" name="skus"  autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
+                    </label>
+                    @endif
+                  @endforeach
+                </div>
+              </template>
+
             </div>
             <div class="cart_amount">
                 <label>数量</label>
