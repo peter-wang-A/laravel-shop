@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Repositories\ProductsPositoryInterface;
 use App\Repositories\ProductsPository;
 use App\Exceptions\InvalidRequestException;
+use Auth;
 
 class ProductsController extends Controller
 {
@@ -67,5 +68,12 @@ class ProductsController extends Controller
         return response()->json([
             'msg' => '取消成功', 'code' => 200
         ]);
+    }
+
+    public function favoritesList(Request $request)
+    {
+        $favorites = Auth::user()->favoriteProducts()->paginate(16);
+
+        return view('products.favorites', ['favorites' => $favorites]);
     }
 }

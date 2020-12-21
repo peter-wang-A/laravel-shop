@@ -34,6 +34,7 @@ Auth::routes(['verify' => true]);
 //商品展示
 Route::prefix('products')->group(function () {
     Route::get('index', 'ProductsController@index')->name('products.index');
+    Route::get('/favoritesList', 'ProductsController@favoritesList')->name('products.favoritesList');
     Route::get('/{product}', 'ProductsController@show')->name('products.show');
     Route::post('/{product}/favor', 'ProductsController@favor')->name('products.favor');
     Route::any('/{product}/disfavor', 'ProductsController@disfavor')->name('products.disfavor');
