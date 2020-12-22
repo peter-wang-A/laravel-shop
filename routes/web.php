@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PagesController;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Route;
 
 
@@ -17,7 +18,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PagesController@root')->name('root');
 
+
+//收货地址
 Route::group(['middleware' => ['auth', 'verified']], function () {
+
+    //购物车
+    Route::any('/cart', 'CartController@add')->name('cart.add');
+    
+
+    //收货地址
     Route::get('/user_addresses', 'UserAddressesController@index')->name('user_addresses.index');
     Route::get('/user_addresses/create', 'UserAddressesController@create')->name('user_addresses.create');
     Route::post('/user_addresses/store', 'UserAddressesController@store')->name('user_addresses.store');
@@ -27,8 +36,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
 
     // Route::resource('')
 });
-
-
+//邮箱验证
 Auth::routes(['verify' => true]);
 
 //商品展示
@@ -39,3 +47,4 @@ Route::prefix('products')->group(function () {
     Route::post('/{product}/favor', 'ProductsController@favor')->name('products.favor');
     Route::any('/{product}/disfavor', 'ProductsController@disfavor')->name('products.disfavor');
 });
+

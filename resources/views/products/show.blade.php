@@ -24,7 +24,6 @@
                 <label>颜色:</label>
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                   @foreach($product->skus as $sku)
-                  @if($sku->sku_category == 1)
                     <label
                     class="btn sku-btn"
                     data-price="{{$sku->price}}"
@@ -34,33 +33,13 @@
                     data-placement="bottom">
                       <input  type="radio" name="skus"  autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
                     </label>
-                    @endif
                   @endforeach
                 </div>
               </template>
-              <template>
-                <label>尺码:</label>
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                  @foreach($product->skus as $sku)
-                  @if($sku->sku_category == 2)
-                    <label
-                    class="btn sku-btn"
-                    data-price="{{$sku->price}}"
-                    data-stock="{{$sku->stock}}"
-                    data-toggle="tooltip"
-                    title="{{ $sku->description }}"
-                    data-placement="bottom">
-                      <input  type="radio" name="skus"  autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
-                    </label>
-                    @endif
-                  @endforeach
-                </div>
-              </template>
-
             </div>
             <div class="cart_amount">
                 <label>数量</label>
-                <input type="text" class="form-control form-control-sm" value="1">
+                <input type="text" id="amount" class="form-control form-control-sm" value="1">
                 <span>件</span>
                 <span class="stock" id="productStok"></span>
             </div>
@@ -70,7 +49,7 @@
               @else
                 <button class="btn btn-success btn-favor" id="btn-favor">❤ 收藏</button>
               @endif
-              <button class="btn btn-primary btn-add-to-cart">加入购物车</button>
+              <button class="btn btn-primary btn-add-to-cart" id='btn-add-to-cart'>加入购物车</button>
             </div>
           </div>
         </div>
@@ -151,6 +130,38 @@
                                     }
                                 })
                             })
+
+                    //购物车
+
+                    $('#btn-add-to-cart').click(function(){
+                            axios.post('{{route('cart.add')}}',{
+                                sku_id:$('label.active input[name=skus]').val(),
+                                amount:$('#amount').val(),
+                            }).then(res=>{
+                                if(res.data.code==200){
+                                    swal('加入成功','success')
+                                };
+                            }).catch(error=>{
+                                if(error.response.status ===401){
+                                    //http 状态码 401 代表未登录
+                                    location.href='/login'
+                                    // http 状态码为 422 代表用户输入校验失败
+                                }else if(error.response.status === 422){
+                                    console.log(error)
+                                    var html = '<div>';
+                                        _.each(error.response.data.errors, function (errors) {
+                                        _.each(errors, function (error) {
+                                            html += error+'<br>';
+                                        })
+                                        });
+                                        html += '</div>';
+                                        swal({content: $(html)[0], icon: 'error'})
+                                }else{
+                                     // 其他情况应该是系统挂了
+                                     swal('系统错误', '', 'error');
+                                };
+                            })
+                    })
         })
     </script>
 @endsection
