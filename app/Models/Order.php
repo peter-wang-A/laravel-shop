@@ -91,7 +91,7 @@ class Order extends Model
     //一个订单有多个商品
     public function items()
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(OrderItem::class);
     }
 
     public static function findAvailable()
@@ -112,4 +112,5 @@ class Order extends Model
         \Log::warning('find order no failed');
         return false;
     }
+
 }

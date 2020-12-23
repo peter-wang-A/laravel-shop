@@ -59,27 +59,30 @@
                 <!-- 开始 -->
                 <div>
                     <form class="form-horizontal" role="form" id="order-form">
-                    <div class="form-group row">
-                        <label class="col-form-label col-sm-3 text-md-right">选择收货地址</label>
-                        <div class="col-sm-9 col-md-7">
-                        <select class="form-control" name="address">
-                            @foreach($addresses as $address)
-                            <option value="{{ $address->id }}">{{ $address->full_address }} {{ $address->contact_name }} {{ $address->contact_phone }}</option>
-                            @endforeach
-                        </select>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-3 text-md-right">选择收货地址</label>
+                            <div class="col-sm-9 col-md-7">
+                                <select class="form-control" name="address">
+                                    @foreach ($addresses as $address)
+                                        <option value="{{ $address->id }}">{{ $address->full_address }}
+                                            {{ $address->contact_name }} {{ $address->contact_phone }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-sm-3 text-md-right">备注</label>
-                        <div class="col-sm-9 col-md-7">
-                        <textarea name="remark" class="form-control" rows="3"></textarea>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-3 text-md-right">备注</label>
+                            <div class="col-sm-9 col-md-7">
+                                <textarea name="remark" class="form-control" rows="3" id="form-control"></textarea>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="offset-sm-3 col-sm-3">
-                        <button type="button" class="btn btn-primary btn-create-order">提交订单</button>
+                        <div class="form-group">
+                            <div class="offset-sm-3 col-sm-3">
+                                <button type="button" class="btn btn-primary btn-create-order"
+                                    id="btn-create-order">提交订单</button>
+                            </div>
                         </div>
-                    </div>
                     </form>
                 </div>
                 <!-- 结束 -->
@@ -125,7 +128,61 @@
                     $(this).prop('checked', checked);
                 })
             })
+
+
+            //提交订单
+            //监听提交按钮
+            $('#btn-create-order').click(function() {
+                //构建请求参数，将地址和备注到里面
+                var req = {
+                    address_id: $('#order-form').find('select[name=address]').val(),
+                    items: [],
+                    remrk: $('#form-control').val()
+                }
+
+                // 遍历 <table> 标签内所有带有 data-id 属性的 <tr> 标签，也就是每一个购物车中的商品 SKU
+                $('table tr[data-id]').each(function() {
+                    var checkbox = $(this).find('input[name=select][type=checkbox]');
+
+                    //去掉属性是 disabled 的
+                    if (checkbox.prop('disabled') && !checkbox.prop('check')) {
+                        return;
+                    }
+
+                    //获取当前数量输入框
+                    var $input = $(this).find('input[name=amount]').val();
+                    //如果输入框为0或不是一个数字，则跳过
+                    if ($input <= 0 && isNaN($input)) {
+                        return;
+                    }
+
+                    req.items.push({
+                        'sku_id': checkbox.val(),
+                        'amount': $input
+                    })
+                })
+                axios.post('{{ route('orders.store') }}', req).then(res => {
+                    console.log(res)
+                    swal('订单提交成功', '', 'success');
+                }).catch(error=>{
+                    if (error.response.status === 422) {
+                        // http 状态码为 422 代表用户输入校验失败
+                        var html = '<div>';
+                        _.each(error.response.data.errors, function (errors) {
+                        _.each(errors, function (error) {
+                            html += error+'<br>';
+                        })
+                        });
+                        html += '</div>';
+                        swal({content: $(html)[0], icon: 'error'})
+                    } else {
+                        // 其他情况应该是系统挂了
+                        swal('系统错误', '', 'error');
+                    }
+                })
+            })
         })
+
     </script>
 
 

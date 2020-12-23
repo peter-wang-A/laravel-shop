@@ -27,6 +27,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/cart/index', 'CartController@index')->name('cart.index');
     Route::any('/cart/{sku}', 'CartController@remove')->name('cart.remove');
 
+    //订单
+    Route::any('orders', 'OrderController@store')->name('orders.store');
+
 
     //收货地址
     Route::get('/user_addresses', 'UserAddressesController@index')->name('user_addresses.index');
