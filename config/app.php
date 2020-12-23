@@ -28,6 +28,8 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    'order_ttl' => 1800,
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderRequest;
+use App\Jobs\CloseOrder;
 use App\Models\ProductSku;
 use App\Models\UserAddress;
 use App\Models\Order;
 use Carbon\Carbon;
+use App\Exceptions\InvalidRequestException;
 
 class OrderController extends Controller
 {
@@ -50,6 +52,9 @@ class OrderController extends Controller
                 $item->productSku()->associate($sku);
                 $item->save();
                 $totalAmount += $sku->price * $data['amount'];
+                if ($sku->decreaseStock($data['amount']) <= 0) {
+                    throw new InvalidRequestException('该商品库存不足');
+                }
             }
 
             // 更新订单总金额
@@ -61,7 +66,7 @@ class OrderController extends Controller
 
             return $order;
         });
-
+        $this->dispatch(new CloseOrder($order, config('app.order_ttl')));
         return $order;
     }
 }
