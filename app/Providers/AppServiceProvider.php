@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
             if (app()->environment() !== 'production') {
                 $config['mode'] = 'dev';
                 $config['log']['level'] = Logger::DEBUG;
+                $config['notify_url'] = route('payment.alipay.notify');
+                $config['notify_url'] = 'http://requestbin.net/r/121pc5s1';
+                $config['return_url'] = route('payment.alipay.return');
             } else {
                 $config['log']['level'] = Logger::WARNING;
             }

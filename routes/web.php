@@ -15,16 +15,14 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+//错误
+Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
 Route::get('/', 'PagesController@root')->name('root');
 
-Route::get('alipay', function() {
-    return app('alipay')->web([
-        'out_trade_no' => time(),
-        'total_amount' => '1',
-        'subject' => 'test subject - 测试',
-    ]);
-});
+
+
+Route::post('payment/alipay/notify', 'PaymentController@alipayNotify')->name('payment.alipay.notify');
 
 //收货地址
 Route::group(['middleware' => ['auth', 'verified']], function () {
@@ -38,6 +36,12 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::any('orders', 'OrderController@store')->name('orders.store');
     Route::get('orders/index', 'OrderController@index')->name('orders.index');
     Route::get('orders/{order}', 'OrderController@show')->name('orders.show');
+
+
+    //支付
+    Route::get('payment/{order}/alipay','PaymentController@payByAlipay')->name('payment.alipay');
+    Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
+
 
 
     //收货地址
