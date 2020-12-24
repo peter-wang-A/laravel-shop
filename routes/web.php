@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PagesController@root')->name('root');
 
+Route::get('alipay', function() {
+    return app('alipay')->web([
+        'out_trade_no' => time(),
+        'total_amount' => '1',
+        'subject' => 'test subject - 测试',
+    ]);
+});
 
 //收货地址
 Route::group(['middleware' => ['auth', 'verified']], function () {
