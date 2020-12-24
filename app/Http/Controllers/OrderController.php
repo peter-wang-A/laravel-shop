@@ -83,4 +83,12 @@ class OrderController extends Controller
         // dd($order);
         return view('orders.index', ['orders' => $order]);
     }
+
+    //订单详情页面，
+    public function show(Order $order)
+    {
+        $this->authorize('own', $order);
+
+        return view('orders.show', ['order' => $order->load(['items.product', 'items.productSku'])]);
+    }
 }
