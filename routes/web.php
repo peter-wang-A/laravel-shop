@@ -29,6 +29,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
 
     //订单
     Route::any('orders', 'OrderController@store')->name('orders.store');
+    Route::get('orders/index', 'OrderController@index')->name('orders.index');
 
 
     //收货地址

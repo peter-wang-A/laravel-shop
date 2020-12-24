@@ -9,9 +9,11 @@ use App\Models\UserAddress;
 use App\Models\Order;
 use Carbon\Carbon;
 use App\Exceptions\InvalidRequestException;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    //创建订单
     public function store(OrderRequest $request)
     {
         $user  = $request->user();
@@ -68,5 +70,17 @@ class OrderController extends Controller
         });
         $this->dispatch(new CloseOrder($order, config('app.order_ttl')));
         return $order;
+    }
+
+    //订单页面
+    public function index(Request $request)
+    {
+        $order = Order::query()
+            ->with(['items.product', 'items.productSku'])
+            ->where('user_id', $request->user()->id)
+            ->paginate();
+
+        // dd($order);
+        return view('orders.index', ['orders' => $order]);
     }
 }
