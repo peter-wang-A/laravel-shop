@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderReviewed;
 use App\Http\Requests\OrderRequest;
+use App\Http\Requests\SendReviewRequest;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,6 +12,7 @@ use App\Services\OrderService;
 use Auth;
 use App\Models\UserAddress;
 use League\Flysystem\InvalidRootException;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -58,5 +61,61 @@ class OrderController extends Controller
         ]);
 
         return $order;
+    }
+
+    //评论页面
+    public function review(Order $order)
+    {
+        //检验权限
+        $this->authorize('own', $order);
+
+        if (!$order->paid_at) {
+            throw new InvalidRootException('订单未支付不可评论');
+        }
+
+        return view('orders.review', ['order' => $order->load('items.product', 'items.productSku')]);
+    }
+
+    //评论
+    public function sendReview(Order $order, SendReviewRequest $request)
+    // public function sendReview(Order $order, Request $request)
+    {
+        //检验权限
+        $this->authorize('own', $order);
+
+        if (!$order->paid_at) {
+            throw new InvalidRootException('该订单未支付不可评论');
+        }
+
+        //判断是否已经评论
+        if ($order->reviewed) {
+            throw new InvalidRootException('该订单已经评论，不可重复添加');
+        }
+
+        //获取评论数据
+        $reviews = $request->input('reviews');
+
+        //开启事务
+        \DB::transaction(function () use ($reviews, $order) {
+            //遍历提交的数据
+            foreach ($reviews as $review) {
+                //找到orderItem
+                $orderItem = $order->items()->find($review['id']);
+
+                //保存评论数据
+                $orderItem->update([
+                    'rating' => $review['rating'],
+                    'review' => $review['review'],
+                    'reviewed_at' => Carbon::now()
+                ]);
+            }
+            //将订单标记为已经评论
+            $order->update([
+                'reviewed' => true
+            ]);
+        });
+        event(new OrderReviewed($order));
+
+        return redirect()->back();
     }
 }

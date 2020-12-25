@@ -39,7 +39,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
 
 
     //支付
-    Route::get('payment/{order}/alipay','PaymentController@payByAlipay')->name('payment.alipay');
+    Route::get('payment/{order}/alipay', 'PaymentController@payByAlipay')->name('payment.alipay');
     Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
 
     //确认收货
@@ -52,6 +52,11 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('/user_addresses/{user_address}/update', 'UserAddressesController@update')->name('user_addresses.update');
     Route::any('/user_addresses/{user_address}/destory', 'UserAddressesController@destroy')->name('user_addresses.destroy');
     Route::get('/user_addresses/{user_address}', 'UserAddressesController@edit')->name('user_addresses.edit');
+
+
+    //评论
+    Route::get('/orders/{order}/review', 'OrderController@review')->name('orders.review.show');
+    Route::post('/orders/{order}/review', 'OrderController@sendReview')->name('orders.review.store');
 
     // Route::resource('')
 });
@@ -66,4 +71,3 @@ Route::prefix('products')->group(function () {
     Route::post('/{product}/favor', 'ProductsController@favor')->name('products.favor');
     Route::any('/{product}/disfavor', 'ProductsController@disfavor')->name('products.disfavor');
 });
-

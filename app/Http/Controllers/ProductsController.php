@@ -8,6 +8,7 @@ use App\Repositories\ProductsPositoryInterface;
 use App\Repositories\ProductsPository;
 use App\Exceptions\InvalidRequestException;
 use Auth;
+use App\Models\OrderItem;
 
 class ProductsController extends Controller
 {
@@ -35,7 +36,6 @@ class ProductsController extends Controller
     //商品详情页面
     public function show(Product $product, Request $request)
     {
-        // dd($product->skus);
         // 判断商品是否已经上架，如果没有上架则抛出异常。
         if (!$product->on_sale) {
             throw new InvalidRequestException('商品未上架');
@@ -48,7 +48,15 @@ class ProductsController extends Controller
             $favored = boolval($user->favoriteProducts()->find($product->id));
         }
 
-        return view('products.show', ['product' => $product, 'favored' => $favored]);
+        $reviews = OrderItem::query()
+            ->with(['order.user', 'productSku']) // 预先加载关联关系
+            ->where('product_id', $product->id)
+            ->whereNotNull('reviewed_at') // 筛选出已评价的
+            ->orderBy('reviewed_at', 'desc') // 按评价时间倒序
+            ->limit(10) // 取出 10 条
+            ->get();
+
+        return view('products.show', ['product' => $product, 'favored' => $favored, 'reviews' => $reviews]);
     }
 
     //收藏
