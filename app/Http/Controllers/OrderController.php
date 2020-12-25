@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use App\Services\OrderService;
 use Auth;
 use App\Models\UserAddress;
-
+use League\Flysystem\InvalidRootException;
 
 class OrderController extends Controller
 {
@@ -42,5 +42,21 @@ class OrderController extends Controller
     {
         $this->authorize('own', $order);
         return view('orders.show', ['order' => $order->load(['items.productSku', 'items.product'])]);
+    }
+
+    //确认收货
+    public function received(Order $order)
+    {
+        //判断商品是否已经发货
+        if ($order->ship_status !== Order::SHIP_STATUS_DELIVERED) {
+            throw new InvalidRootException('订单状态错误');
+        }
+
+        //更新为发货
+        $order->update([
+            'ship_status' => Order::SHIP_STATUS_RECEIVED
+        ]);
+
+        return $order;
     }
 }

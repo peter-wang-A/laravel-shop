@@ -43,7 +43,7 @@
                         <tr>
                             <td colspan="4"></td>
                         </tr>
-                        
+
                     </table>
                     <div class="order-bottom">
                         <div class="order-info">
@@ -59,6 +59,20 @@
                                 <div class="line-label">订单编号：</div>
                                 <div class="line-value">{{ $order->no }}</div>
                             </div>
+                            <!-- 输出物流状态 -->
+                            <div class="line">
+                                <div class="line-label">物流状态：</div>
+                                <div class="line-value">{{ \App\Models\Order::$shipStatusMap[$order->ship_status] }}</div>
+                            </div>
+                            <!-- 如果有物流信息则展示 -->
+                            @if ($order->ship_data)
+                                <div class="line">
+                                    <div class="line-label">物流信息：</div>
+                                    <div class="line-value">{{ $order->ship_data['express_company'] }}
+                                        {{ $order->ship_data['express_no'] }}
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                         <div class="order-summary text-right">
                             <div class="total-amount">
@@ -80,11 +94,21 @@
                                         未支付
                                     @endif
                                 </div>
+
                                 <!-- 支付按钮开始 -->
                                 @if (!$order->paid_at && !$order->closed)
                                     <div class="payment-buttons">
                                         <a class="btn btn-primary btn-sm"
                                             href="{{ route('payment.alipay', ['order' => $order->id]) }}">支付宝支付</a>
+                                    </div>
+                                @endif
+                                <!-- 如果订单的发货状态为已发货则展示确认收货按钮 -->
+                                @if ($order->ship_status === \App\Models\Order::SHIP_STATUS_DELIVERED)
+                                    <div class="receive-button">
+                                        {{-- <form method="post" action="{{ route('orders.received', [$order->id]) }}"> --}}
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                id="btn-success">确认收货</button>
+                                        {{-- </form> --}}
                                     </div>
                                 @endif
                                 <!-- 支付按钮结束 -->
@@ -95,4 +119,28 @@
             </div>
         </div>
     </div>
+@endsection
+
+
+@section('scriptAfterJs')
+    <script>
+        $(document).ready(function() {
+            $('#btn-success').click(function(){
+                 swal({
+                     title:"确认要收货吗?",
+                     icon:'warning',
+                     dangerMode: true,
+                     buttons: ['取消', '确认收到'],
+                 }).then((res) => {
+                     if(!res){
+                         return;
+                     }
+                     axios.post('{{ route('orders.received', [$order->id]) }}').then(res=>{
+                         location.reload();
+                     })
+                 })
+            })
+        })
+
+    </script>
 @endsection
