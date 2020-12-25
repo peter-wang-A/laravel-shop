@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Exceptions\InvalidRequestException;
 use League\Flysystem\InvalidRootException;
 use Carbon\Carbon;
+use App\Events\OrderPaid;
 
 
 class PaymentController extends Controller
@@ -75,6 +76,8 @@ class PaymentController extends Controller
         ]);
 
 
+        //触发事件
+        $this->afterPaid($order);
 
         return app('alipay')->success();
     }
