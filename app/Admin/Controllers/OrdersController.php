@@ -8,9 +8,15 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Layout\Content;
+// use GuzzleHttp\Psr7\Request;
+use App\Models\User;
+use League\Flysystem\InvalidRootException;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 
 class OrdersController extends AdminController
 {
+    use ValidatesRequests;
     /**
      * Title for current resource.
      *
@@ -77,6 +83,39 @@ class OrdersController extends AdminController
      * @param mixed $id
      * @return Show
      */
+
+    //发货接口
+    // public function ship(User $order, Request $request)
+    public function ship(Order $order, Request $request)
+    {
+        // return 'bb';
+        //判断是否支付
+        if (!$order->paid_at) {
+            throw new InvalidRootException('该订单未支付');
+        }
+
+        //判断该订单状态是否为未发货
+        if ($order->ship_status !== Order::REFUND_STATUS_PENDING) {
+            throw new InvalidRootException('该订单已发货');
+        }
+
+        // Laravel 5.5 之后 validate 方法可以返回校验过的值
+        $data = $this->validate($request, [
+            'express_company' => ['required'],
+            'express_no'      => ['required'],
+        ], [], [
+            'express_company' => '物流公司',
+            'express_no'      => '物流单号',
+        ]);
+
+        //把数据库改为已发货
+        $order->update([
+            'ship_status' => Order::SHIP_STATUS_DELIVERED,
+            'ship_data' => $data,
+        ]);
+
+        return redirect()->back();
+    }
     // protected function detail($id)
     // {
     //     $show = new Show(Order::findOrFail($id));
