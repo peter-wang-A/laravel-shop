@@ -8,22 +8,24 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
 use Auth;
-
+use App\Models\UserAddress;
 
 
 class OrderController extends Controller
 {
-    protected $ordSer;
-    public function __construct(OrderService $ordSer)
-    {
-        $this->ordSer = $ordSer;
-    }
+    // protected $ordSer;
+    // public function __construct(OrderService $ordSer)
+    // {
+    //     $this->ordSer = $ordSer;
+    // }
     //创建订单
-    public function store(OrderRequest $request)
+    public function store(OrderRequest $request, OrderService $orderService)
     {
-        $this->ordSer->store($request);
-    }
+        $user    = $request->user();
+        $address = UserAddress::find($request->input('address_id'));
 
+        return $orderService->store($user, $address, $request->input('remark'), $request->input('items'));
+    }
     //订单页面
     public function index(Request $request)
     {
