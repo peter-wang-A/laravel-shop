@@ -46,7 +46,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('orders/{order}/received', 'OrderController@received')->name('orders.received');
 
     //退款
-    Route::any('/order/{order}/apply', 'OrderController@applyRefund')->name('orders.apply');
+    //客户端提交退款理由
+    Route::any('/order/{order}/refund', 'OrderController@handleRefund')->name('orders.refund');
+
 
     //收货地址
     Route::get('/user_addresses', 'UserAddressesController@index')->name('user_addresses.index');

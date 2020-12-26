@@ -34,4 +34,7 @@ Route::group([
     //     return 'a';
     // })->name('admin.orders.ship');
     $router->post('orders/{order}/ship', 'OrdersController@ship')->name('admin.orders.ship');
+
+    //处理客户退款
+    $router->post('orders/{order}/refund', 'OrdersController@ship')->name('admin.orders.handle_refund');
 });

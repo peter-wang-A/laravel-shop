@@ -167,7 +167,7 @@
                        swal('退款理由不可为空','','error')
                        return
                    }
-                   axios.post('{{route('orders.apply',['order'=>$order->id])}}',{reason:input}).then(res=>{
+                   axios.post('{{route('orders.refund',['order'=>$order->id])}}',{reason:input}).then(res=>{
                        if(res.code==200){
                            swal('退款申请成功','','success').then(res=>{
                                location.reload()
