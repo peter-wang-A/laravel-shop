@@ -49,6 +49,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     //客户端提交退款理由
     Route::any('/order/{order}/refund', 'OrderController@handleRefund')->name('orders.refund');
 
+    //优惠券
+    //查看优惠券
+    Route::get('coupon_codes/{code}', 'CouponCodesController@show')->name('coupon_codes.show');
 
     //收货地址
     Route::get('/user_addresses', 'UserAddressesController@index')->name('user_addresses.index');

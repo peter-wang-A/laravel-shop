@@ -77,6 +77,21 @@
                                 <textarea name="remark" class="form-control" rows="3" id="form-control"></textarea>
                             </div>
                         </div>
+
+                             <!-- 优惠码开始 -->
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-3 text-md-right">优惠码</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" name="coupon_code">
+                                    <span class="form-text text-muted" id="coupon_desc"></span>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="button" class="btn btn-success" id="btn-check-coupon">检查</button>
+                                    <button type="button" class="btn btn-danger" style="display: none;" id="btn-cancel-coupon">取消</button>
+                                </div>
+                            </div>
+                            <!-- 优惠码结束 -->
+
                         <div class="form-group">
                             <div class="offset-sm-3 col-sm-3">
                                 <button type="button" class="btn btn-primary btn-create-order"
@@ -86,6 +101,7 @@
                     </form>
                 </div>
                 <!-- 结束 -->
+
             </div>
         </div>
     </div>
@@ -181,6 +197,38 @@
                         swal('系统错误', '', 'error');
                     }
                 })
+            })
+
+            //检查优惠券
+            $('#btn-check-coupon').click(function(){
+                //获取输入框的值
+               var value = $('input[name=coupon_code]').val()
+               if(!value){
+                swal('请输入优惠券码','','warning')
+                return
+               }
+
+               axios.get('/coupon_codes/'+encodeURIComponent(value)).then(res=>{
+                   console.log(res)
+                   if(res.status === 200){
+                    $('#coupon_desc').text(res.data.description)
+                    $('input[name=coupon_code]').prop('readonly', true); // 禁用输入框
+                    $('#btn-cancel-coupon').show(); // 显示 取消 按钮
+                    $('#btn-check-coupon').hide(); // 隐藏 检查 按钮
+                   }
+               }).catch(err=>{
+                   // 如果返回码是 404，说明优惠券不存在
+                   console.log(err.response.status)
+                   if(err.response.status == 404){
+                       swal('优惠码不存在','','error')
+                   }
+                   else if(err.response.status == 403){
+                       swal(err.response.data.msg,'','error')
+                   }else{
+                       //其他错误
+                       swal('系统内部错误','','error')
+                   }
+               })
             })
         })
 
