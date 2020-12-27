@@ -94,6 +94,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    //一个订单一个优惠券
+    public function coupon()
+    {
+        return $this->belongsTo(CouponCode::class);
+    }
     public static function findAvailable()
     {
         //订单流水号前缀
@@ -112,5 +117,4 @@ class Order extends Model
         \Log::warning('find order no failed');
         return false;
     }
-
 }
