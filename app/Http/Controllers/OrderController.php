@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\App\Moldes\CouponCode;
 use App\Events\OrderReviewed;
+use App\Exceptions\CouponCodeUnavailableException;
 use App\Exceptions\InternalException;
 use App\Http\Requests\AppplyRefundRequest;
 use App\Http\Requests\OrderRequest;
@@ -28,8 +30,19 @@ class OrderController extends Controller
     {
         $user    = $request->user();
         $address = UserAddress::find($request->input('address_id'));
+        $coupon  = null;
 
-        return $orderService->store($user, $address, $request->input('remark'), $request->input('items'));
+        //如果用户提交了优惠券信息
+        if ($code = $request->input('coupon_code')) {
+            //查出优惠码
+            $coupon = CouponCode::where('code', $code)->first();
+
+            if (!$coupon) {
+                throw new CouponCodeUnavailableException('优惠券不存在');
+            }
+        }
+
+        return $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon);
     }
     //订单页面
     public function index(Request $request)
@@ -146,8 +159,8 @@ class OrderController extends Controller
         ]);
 
         return response()->json([
-            'code'=>200,
-            'msg'=>$order
+            'code' => 200,
+            'msg' => $order
         ]);
     }
 }
