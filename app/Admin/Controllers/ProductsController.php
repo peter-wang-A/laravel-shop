@@ -65,12 +65,12 @@ class ProductsController extends AdminController
     protected function form()
     {
         $form = new Form(new Product);
-
+        $watermark = public_path('watermark.png');
         // 创建一个输入框，第一个参数 title 是模型的字段名，第二个参数是该字段描述
         $form->text('title', '商品名称')->rules('required');
 
         // 创建一个选择图片的框
-        $form->image('image', '封面图片')->rules('required|image');
+        $form->image('image', '封面图片')->insert($watermark,'content')->rules('required|image');
 
         // 创建一个富文本编辑器
         $form->quill('discription', '商品描述')->rules('required');
