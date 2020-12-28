@@ -15,4 +15,6 @@ yarn-error.log
 /public/js
 /public/css
 
- public/fonts/
+ /public/fonts/
+
+/resources/wechat_pay

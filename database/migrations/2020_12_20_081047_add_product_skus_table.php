@@ -14,7 +14,7 @@ class AddProductSkusTable extends Migration
     public function up()
     {
         Schema::table('product_skus', function (Blueprint $table) {
-            $table->integer('sku_category');
+            $table->integer('sku_category')->default(1);
         });
     }
 
