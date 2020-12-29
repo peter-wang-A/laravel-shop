@@ -8,10 +8,24 @@ use Illuminate\Support\Str;
 
 class Product extends Model
 {
+    const TYPE_NORMAL = 'normal';
+    const TYPE_CROWDFUNDING = 'crowdfunding';
+
+    public static $typeMap = [
+        self::TYPE_NORMAL => '普通商品',
+        self::TYPE_CROWDFUNDING => '众筹商品'
+    ];
+
     protected $fillable = [
         'title', 'discription', 'image', 'on_sale',
-        'rating', 'sold_count', 'review_count', 'price'
+        'rating', 'sold_count', 'review_count', 'price', 'type'
     ];
+
+    //众筹商品模型关系，一对一
+    public function crouwdfunding()
+    {
+        return $this->hasOne(CrowdfundingProduct::class);
+    }
 
     protected $casts = [
         'on_sale' => 'boolean'
