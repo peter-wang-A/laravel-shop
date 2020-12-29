@@ -9,6 +9,8 @@ use App\Repositories\ProductsPository;
 use App\Exceptions\InvalidRequestException;
 use Auth;
 use App\Models\OrderItem;
+use App\Services\CartService;
+use App\Services\CategoryService;
 
 class ProductsController extends Controller
 {
@@ -30,7 +32,7 @@ class ProductsController extends Controller
                 'search' => $products['search'],
                 'order' => $products['order']
             ],
-            'category' => $products['category']
+            'category' => $products['category'],
         ]);
     }
 

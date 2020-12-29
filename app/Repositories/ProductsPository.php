@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductSku;
 
+
 class  ProductsPository implements ProductsPositoryInterface
 {
 
@@ -66,7 +67,8 @@ class  ProductsPository implements ProductsPositoryInterface
             'products' => $products,
             'search' => $search,
             'order' => $order,
-            'category' => $category ?? null
+            'category' => $category ?? null,
+
         ];
         return $data;
     }
