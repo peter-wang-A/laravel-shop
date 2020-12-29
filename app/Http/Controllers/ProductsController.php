@@ -29,7 +29,8 @@ class ProductsController extends Controller
             'filters' => [
                 'search' => $products['search'],
                 'order' => $products['order']
-            ]
+            ],
+            'category' => $products['category']
         ]);
     }
 

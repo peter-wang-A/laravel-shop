@@ -4,6 +4,9 @@
         <a class="navbar-brand " href="{{ url('/') }}">
             Laravel Shop
         </a>
+        <select name="" id="">
+            <option value="">所有分类</option>
+        </select>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

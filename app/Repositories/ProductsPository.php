@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductSku;
 
 class  ProductsPository implements ProductsPositoryInterface
 {
@@ -31,6 +33,19 @@ class  ProductsPository implements ProductsPositoryInterface
                     });
             });
         }
+
+        $req_category_id = $request->input('category_id');
+
+        if ($req_category_id && $category = Category::find($req_category_id)) {
+            if ($category->is_directory) {
+                //把子目录商品全部查出来
+                $builder->whereHas('category', function ($query) use ($category) {
+                    $query->where('path', 'like', $category->path . $category->id . '-');
+                });
+            } else {
+                $builder->where('category_id', $category->id);
+            }
+        }
         /**
          * 是否有order 参数，如果有就给 $order 变量
          */
@@ -47,7 +62,12 @@ class  ProductsPository implements ProductsPositoryInterface
 
         $products = $builder->paginate(16);
 
-        $data = ['products' => $products, 'search' => $search, 'order' => $order];
+        $data = [
+            'products' => $products,
+            'search' => $search,
+            'order' => $order,
+            'category' => $category ?? null
+        ];
         return $data;
     }
 
