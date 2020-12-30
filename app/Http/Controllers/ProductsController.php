@@ -58,7 +58,6 @@ class ProductsController extends Controller
             ->orderBy('reviewed_at', 'desc') // 按评价时间倒序
             ->limit(10) // 取出 10 条
             ->get();
-
         return view('products.show', ['product' => $product, 'favored' => $favored, 'reviews' => $reviews]);
     }
 

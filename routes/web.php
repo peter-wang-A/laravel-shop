@@ -66,6 +66,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/orders/{order}/review', 'OrderController@review')->name('orders.review.show');
     Route::post('/orders/{order}/review', 'OrderController@sendReview')->name('orders.review.store');
 
+    //众筹
+    Route::any('crowdfunding_orders', 'OrderController@crowdfunding')->name('crowdfunding_orders.store');
+
     // Route::resource('')
 });
 //邮箱验证

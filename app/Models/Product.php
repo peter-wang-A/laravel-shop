@@ -22,7 +22,7 @@ class Product extends Model
     ];
 
     //众筹商品模型关系，一对一
-    public function crouwdfunding()
+    public function crowdfunding()
     {
         return $this->hasOne(CrowdfundingProduct::class);
     }

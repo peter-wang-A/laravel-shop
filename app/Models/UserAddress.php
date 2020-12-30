@@ -17,7 +17,7 @@ class UserAddress extends Model
         'contact_phone',
         'last_userd_at',
     ];
-
+    protected $appends = ['full_address'];
 
     //定义时间日期关系，返回 Carbon
     protected $dates = ['last_used_at'];
