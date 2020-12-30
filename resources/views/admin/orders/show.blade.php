@@ -51,7 +51,11 @@
                 </tr>
                 <!-- 订单发货开始 -->
                 <!-- 如果订单未发货，展示发货表单 -->
+                <!-- 如果订单退款状态不是退款成功 -->
+                <!-- 如果订单类型不是众筹类型或如果商品的状态是众筹成功  -->
+
                 @if ($order->ship_status === \App\Models\Order::SHIP_STATUS_PENDING)
+                @if($order->refund_status !== Order::REFUND_STATUS_SUCCESS && ($order->type !==Order::TYPE_CROWDFUNDING ||  ))
                     <tr>
                         <td colspan="4">
                             <form action="{{ route('admin.orders.ship', [$order->id]) }}" method="post"
@@ -82,6 +86,7 @@
                             </form>
                         </td>
                     </tr>
+                    @endif
                 @else
                     <!-- 否则展示物流公司和物流单号 -->
                     <tr>
