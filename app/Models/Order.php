@@ -9,11 +9,11 @@ class Order extends Model
 {
     //众筹状态常量
     const TYPE_NORMAL = 'normal';
-    const TYPE_CROWDFUNFING = 'crowdfunding';
+    const TYPE_CROWDFUNDING = 'crowdfunding';
 
     public static $typeMap = [
         self::TYPE_NORMAL => '普通商品订单',
-        self::TYPE_CROWDFUNFING => '众筹商品订单'
+        self::TYPE_CROWDFUNDING => '众筹商品订单'
     ];
     //退款状态
     const REFUND_STATUS_PENDING = 'pending';

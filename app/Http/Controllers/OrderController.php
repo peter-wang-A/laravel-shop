@@ -148,7 +148,7 @@ class OrderController extends Controller
         }
 
         //判断订单是否为众筹订单
-        if ($order->type === Order::TYPE_CROWDFUNFING) {
+        if ($order->type === Order::TYPE_CROWDFUNDING) {
             throw new InvalidRequestException('该订单为众筹订单不可退款');
         }
 

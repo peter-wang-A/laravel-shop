@@ -30,7 +30,7 @@ class UpdateCrowdfundingProductProgress
         //获取订单
         $order = $event->getOrder();
         //如果订单类型不是众筹商品订单，无需处理
-        if ($order->type !== Order::TYPE_CROWDFUNFING) {
+        if ($order->type !== Order::TYPE_CROWDFUNDING) {
             return;
         }
 
@@ -39,7 +39,7 @@ class UpdateCrowdfundingProductProgress
 
         $data = Order::query()
             // 查出订单类型为众筹订单
-            ->where('type', Order::TYPE_CROWDFUNFING)
+            ->where('type', Order::TYPE_CROWDFUNDING)
             ->whereNotNull('paid_at')
             ->whereHas('items', function ($query) use ($crowdfunding) {
                 $query->where('product_id', $crowdfunding->product_id);

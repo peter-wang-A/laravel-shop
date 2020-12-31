@@ -122,7 +122,7 @@
                             @endif
                             <!-- 支付按钮结束 -->
                             <!-- 订单已支付，且退款状态是未退款时展示申请退款按钮 -->
-                            @if ($order->type!==App\Models\Order::TYPE_CROWDFUNFING &&
+                            @if ($order->type!==App\Models\Order::TYPE_CROWDFUNDING &&
                                                 $order->paid_at &&
                                                 $order->refund_status === App\Models\Order::REFUND_STATUS_PENDING)
                                 <div class="refund-button">

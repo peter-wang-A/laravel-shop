@@ -104,7 +104,7 @@ class OrdersController extends AdminController
         }
 
         //如果该订单还是众筹订单，但未众筹成功不能发货
-        if ($order->type === Order::TYPE_CROWDFUNFING && $order->items[0]->product->crowdfunding->status !== CrowdfundingProduct::STATUS_SUCCESS) {
+        if ($order->type === Order::TYPE_CROWDFUNDING && $order->items[0]->product->crowdfunding->status !== CrowdfundingProduct::STATUS_SUCCESS) {
             throw new InvalidRequestException('众筹订单只能在众筹成功之后发货');
         }
 

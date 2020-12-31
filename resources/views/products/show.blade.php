@@ -294,8 +294,32 @@
                             }
 
                             axios.post('{{route('crowdfunding_orders.store')}}',req).then(res=>{
-                                console.log(res)
-                            })
+                               // 订单创建成功，跳转到订单详情页
+                                    swal('订单提交成功', '', 'success')
+                                    .then(() => {
+                                        console.log(res)
+                                        return
+                                        location.href = '/orders/' + res.data.id;
+                                    }).catch(error=>{
+
+                                        // 输入参数校验失败，展示失败原因
+                                    if (error.response.status === 422) {
+                                    var html = '<div>';
+                                    _.each(error.response.data.errors, function (errors) {
+                                        _.each(errors, function (error) {
+                                        html += error+'<br>';
+                                        })
+                                    });
+                                    html += '</div>';
+                                    swal({content: $(html)[0], icon: 'error'})
+                                    } else if (error.response.status === 403) {
+                                    swal(error.response.data.msg, '', 'error');
+                                    } else {
+                                    swal('系统错误', '', 'error');
+                                    }
+
+                                    });
+                                })
                         })
 
                     });

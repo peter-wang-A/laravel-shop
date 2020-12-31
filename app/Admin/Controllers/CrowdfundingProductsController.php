@@ -44,10 +44,10 @@ class CrowdfundingProductsController extends CommonProductsController
         });
         $grid->price('价格');
         //展示众筹字段
-        $grid->column('crouwdfunding.target_amount', '目标金额');
-        $grid->column('crouwdfunding.total_amount', '目前金额');
-        $grid->column('crouwdfunding.end_at', '结束时间');
-        $grid->column('crouwdfunding.status', '状态')->display(function ($value) {
+        $grid->column('crowdfunding.target_amount', '目标金额');
+        $grid->column('crowdfunding.total_amount', '目前金额');
+        $grid->column('crowdfunding.end_at', '结束时间');
+        $grid->column('crowdfunding.status', '状态')->display(function ($value) {
             return CrowdfundingProduct::$statusMap[$value];
         });
 
@@ -55,8 +55,8 @@ class CrowdfundingProductsController extends CommonProductsController
      protected function customForm(Form $form){
 
        // 添加众筹相关字段
-        $form->text('crouwdfunding.target_amount', '众筹目标金额')->rules('required|numeric|min:0.01');
-        $form->datetime('crouwdfunding.end_at', '众筹截至时间')->rules('required|date');
+        $form->text('crowdfunding.target_amount', '众筹目标金额')->rules('required|numeric|min:0.01');
+        $form->datetime('crowdfunding.end_at', '众筹截至时间')->rules('required|date');
 
      }
 }
