@@ -68,7 +68,7 @@ class FinishCrowdfunding extends Command
     }
 
     //众筹失败逻辑
-    public function crowdfunfingFailed($crowdfunding)
+    public function crowdfundingFailed($crowdfunding)
     {
         $crowdfunding->update([
             'status' => CrowdfundingProduct::STATUS_FAIL
