@@ -235,12 +235,9 @@
 
             $('.btn-select-installment').click(function(){
                 axios.post('{{route('payment.installment',['order'=>$order->id])}}',{count:$(this).data('count')}).then(res=>{
-                    console.log(res)
+                    location.href='/installments/'+res.data.id+'/show'
                 })
             })
-
-
-
         })
 
     </script>
