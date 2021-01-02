@@ -26,6 +26,8 @@ Route::post('payment/alipay/notify', 'PaymentController@alipayNotify')->name('pa
 
 //收货地址
 Route::group(['middleware' => ['auth', 'verified']], function () {
+    //分期付款
+    Route::any('payment/{order}/installment', 'PaymentController@payByInstallment')->name('payment.installment');
 
     //购物车
     Route::any('/cart', 'CartController@add')->name('cart.add');

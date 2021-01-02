@@ -54,6 +54,7 @@ class OrderController extends Controller
         $order = Order::query()
             ->with(['items.product', 'items.productSku'])
             ->where('user_id', $request->user()->id)
+            ->orderBy('id','desc')
             ->paginate();
 
         return view('orders.index', ['orders' => $order]);
