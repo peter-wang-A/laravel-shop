@@ -55,6 +55,7 @@
                             <a class="dropdown-item" id="logout" href="{{ route('cart.index') }}">购物车</a>
 
                             <a href="{{ route('orders.index') }}" class="dropdown-item">我的订单</a>
+                            <a href="{{ route('installments.index') }}" class="dropdown-item">我的分期</a>
                             <a class="dropdown-item" id="logout" href="#"
                                 onclick="event.preventDefault();document.getElementById('logout-form').submit();">退出登录</a>
 
