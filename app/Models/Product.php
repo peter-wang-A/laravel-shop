@@ -37,9 +37,24 @@ class Product extends Model
         return $this->hasMany(ProductSku::class);
     }
 
+    public function properties()
+    {
+        return $this->hasMany(ProductProperty::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    //定义一个查询构造器，把相同的属性名的属性值单独取出
+    public function getGroupPropertiesAttribute()
+    {
+        return $this->properties
+            ->groupBy('name')
+            ->map(function ($properties) {
+                return $properties->pluck('value')->all();
+            });
     }
 
     //查看器，把相对路径改为绝对路径

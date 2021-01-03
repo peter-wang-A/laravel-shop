@@ -61,7 +61,7 @@ class  ProductsPository implements ProductsPositoryInterface
             }
         }
 
-        $products = $builder->paginate(16);
+        $products = $builder->orderBy('id','desc')->paginate(16);
 
         $data = [
             'products' => $products,
