@@ -18,7 +18,7 @@ class Product extends Model
 
     protected $fillable = [
         'title', 'discription', 'image', 'on_sale',
-        'rating', 'sold_count', 'review_count', 'price', 'type'
+        'rating', 'sold_count', 'review_count', 'price', 'type','long_title'
     ];
 
     //众筹商品模型关系，一对一
