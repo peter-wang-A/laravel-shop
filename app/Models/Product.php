@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\ProductSku;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class Product extends Model
 {
@@ -18,7 +19,7 @@ class Product extends Model
 
     protected $fillable = [
         'title', 'discription', 'image', 'on_sale',
-        'rating', 'sold_count', 'review_count', 'price', 'type','long_title'
+        'rating', 'sold_count', 'review_count', 'price', 'type', 'long_title'
     ];
 
     //众筹商品模型关系，一对一
@@ -67,5 +68,47 @@ class Product extends Model
 
 
         return \Storage::disk('public')->url($this->attributes['image']);
+    }
+
+    //把数据写入 es
+    public function toESArray()
+    {
+        $arr = Arr::only($this->toArray(), [
+            'id',
+            'type',
+            'title',
+            'category_id',
+            'long_title',
+            'on_sale',
+            'rating',
+            'sold_count',
+            'review_count',
+            'price',
+        ]);
+
+        // 如果商品有类目，则 category 字段为类目名数组，否则为空字符串
+        $arr['category'] = $this->category ? explode('-', $this->category->item_name) : '';
+
+        // 类目的 PATH 字段
+        $arr['category_path'] = $this->category ? $this->category->path : '';
+
+        // strip_tags 函数可以将 html 标签去除
+        $arr['description'] = strip_tags($this->discription);
+
+        //取出需要的 sku 字段
+        $arr['skus'] = $this->skus->map(function (ProductSku $sku) {
+            return Arr::only($sku->toArray(), [
+                'title', 'description', 'price'
+            ]);
+        });
+
+        //取出需要的属性属性
+        $arr['properties'] = $this->properties->map(function (ProductProperty $pro) {
+            return Arr::only($pro->toArray(), [
+                'name', 'value'
+            ]);
+        });
+
+        return $arr;
     }
 }
