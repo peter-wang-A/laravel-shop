@@ -6,6 +6,7 @@ use Monolog\Logger;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema; //add fixed sql
 use Yansongda\Pay\Pay;
+use Elasticsearch\ClientBuilder as ESClientBuilder;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        //支付宝支付
         $this->app->singleton('alipay', function () {
             $config               = config('pay.alipay');
             $config['notify_url'] =ngrok_url('payment.alipay.notify');
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
             return Pay::alipay($config);
         });
 
+        //微信支付
         $this->app->singleton('wechat', function () {
             $config = config('pay.wechat');
 
@@ -49,6 +52,21 @@ class AppServiceProvider extends ServiceProvider
             //调用 Yansongda\Pay 来创建一个支付宝对象
             return Pay::wechat($config);
         });
+
+        //elasticsearch 启动
+        // 注册一个名为 es 的单例
+        $this->app->singleton('es', function () {
+            // 从配置文件读取 Elasticsearch 服务器列表
+            $builder = ESClientBuilder::create()->setHosts(config('database.elasticsearch.hosts'));
+            // 如果是开发环境
+            if (app()->environment() === 'local') {
+                // 配置日志，Elasticsearch 的请求和返回数据将打印到日志文件中，方便我们调试
+                $builder->setLogger(app('log')->driver());
+            }
+
+            return $builder->build();
+        });
+
     }
 
     /**
