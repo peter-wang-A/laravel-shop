@@ -2,11 +2,13 @@
 
 namespace App\Admin\Controllers;
 
+use App\Console\Commands\Elasticsearch\SyncProducts;
 use Encore\Admin\Controllers\AdminController;
 use App\Models\Category;
 use App\Models\Product;
 use Encore\Admin\Grid;
 use Encore\Admin\Form;
+use App\Jobs\SyncProductToES;
 
 
 abstract class CommonProductsController extends AdminController
@@ -72,17 +74,20 @@ abstract class CommonProductsController extends AdminController
         });
 
         //商品属性
-        $form->hasMany('properties','商品属性',function(Form\NestedForm $form){
-            $form->text('name','属性名称')->rules('required');
-            $form->text('value','属性值')->rules('required');
+        $form->hasMany('properties', '商品属性', function (Form\NestedForm $form) {
+            $form->text('name', '属性名称')->rules('required');
+            $form->text('value', '属性值')->rules('required');
         });
-
 
 
         $form->saving(function (Form $form) {
             $form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price') ?: 0;
         });
 
+        $form->saved(function (Form $form) {
+            $product = $form->model();
+            dispatch(new SyncProductToES($product));
+        });
         return $form;
     }
 
