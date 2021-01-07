@@ -51,12 +51,20 @@ abstract class CommonProductsController extends AdminController
         $form->hidden('type')->value($this->getProductType());
         $form->text('title', '商品名称')->rules('required');
         $form->text('long_title', '商品长标题')->rules('required');
-        $form->select('category_id', '类目')->options(function ($id) {
-            $category = Category::find($id);
-            if ($category) {
-                return [$category->id => $category->full_name];
+        // $form->select('category_id', '类目')->options(function ($id) {
+        //     $category = Category::find($id);
+        //     if ($category) {
+        //         return [$category->id => $category->item_name];
+        //     }
+        // })->ajax('/admin/api/categories?is_directory=0');
+        $form->select('category_id', '类目')->options(function () {
+            $categories =  Category::query()->get();
+            $data = [];
+            foreach ($categories as $category) {
+                $data[$category->id] = $category->name;
             }
-        })->ajax('/admin/api/categories?is_directory=0');
+            return $data;
+        });
         $form->image('image', '封面图片')->rules('required|image');
         $form->quill('discription', '商品描述')->rules('required');
         $form->radio('on_sale', '上架')->options(['1' => '是', '0' => '否'])->default('0');
