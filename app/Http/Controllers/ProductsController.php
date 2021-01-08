@@ -35,6 +35,7 @@ class ProductsController extends Controller
             ],
             'category' => $products['category'],
             'properties' => $products['properties'],
+            'propertyFilters' => $products['propertyFilters'],
         ]);
     }
 

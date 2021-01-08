@@ -266,7 +266,8 @@ class  ProductsPository implements ProductsPositoryInterface
             'order' => $order,
             'order' => $order,
             'category' => $category ?? null,
-            'properties' => $properties
+            'properties' => $properties,
+            'propertyFilters' => $propertyFilters,
         ];
         return $data;
     }
