@@ -81,7 +81,7 @@ class  ProductsPository implements ProductsPositoryInterface
         $params = [
             'index' => 'products',
             'body' => [
-                'from' =>  ($page - 1) * $perPage,// 通过当前页数与每页数量计算偏移值
+                'from' => ($page - 1) * $perPage, // 通过当前页数与每页数量计算偏移值
                 'size' => $perPage,
                 'query' => [
                     'bool' => [
@@ -103,7 +103,6 @@ class  ProductsPository implements ProductsPositoryInterface
                 }
             }
         }
-
 
         //类目筛选
         $categoryId = $request->input('category_id');
@@ -143,8 +142,107 @@ class  ProductsPository implements ProductsPositoryInterface
             }
         }
 
+
+        if ($search || isset($category)) {
+            $params['body']['aggs'] = [
+                'properties' => [
+                    'nested' => [
+                        'path' => 'properties',
+                    ],
+                    'aggs' => [
+                        'properties' => [
+                            'terms' => [
+                                'field' => 'properties.name'
+                            ],
+                            'aggs' => [
+                                'value' => [
+                                    'terms' => [
+                                        'field' => 'properties.value'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+            ];
+        }
+
         //执行搜索
         $result = app('es')->search($params);
+
+        //按条件筛选
+        // $propertyFilters = [];
+        // if ($filterString = $request->input('filters')) {
+        //     //将获取到的字符串，用 | 切割成数组
+        //     $filterArray = explode('|', $filterString);
+        //     // 将字符串用符号 : 拆分成两部分并且分别赋值给 $name 和 $value 两个变量
+        //     foreach ($filterArray as $filter) {
+        //         list($name, $value) = explode(':', $filter);
+        //         // 将用户筛选的属性添加到数组中
+        //         $propertyFilters[$name] = $value;
+        //         // 添加到 filter 类型中
+        //         $params['body']['query']['bool']['filter'][] = [
+        //             // 由于我们要筛选的是 nested 类型下的属性，因此需要用 nested 查询
+        //             'nested' => [
+        //                 // 指明 nested 字段
+        //                 'path' => 'properties',
+        //                 'query' => [
+        //                     ['term' => ['properties.name' => $name]],
+        //                     ['term' => ['properties.value' => $value]],
+        //                 ]
+        //             ]
+        //         ];
+
+        //     }
+        //     // dd($params);
+        // }
+
+        $propertyFilters  = [];
+             // 从用户请求参数获取 filters
+             if ($filterString = $request->input('filters')) {
+                // 将获取到的字符串用符号 | 拆分成数组
+                $filterArray = explode('|', $filterString);
+                foreach ($filterArray as $filter) {
+                    // 将字符串用符号 : 拆分成两部分并且分别赋值给 $name 和 $value 两个变量
+                    list($name, $value) = explode(':', $filter);
+
+                      // 将用户筛选的属性添加到数组中
+                        $propertyFilters[$name] = $value;
+
+                    // 添加到 filter 类型中
+                    $params['body']['query']['bool']['filter'][] = [
+                        // 由于我们要筛选的是 nested 类型下的属性，因此需要用 nested 查询
+                        'nested' => [
+                            // 指明 nested 字段
+                            'path'  => 'properties',
+                            'query' => [
+                                ['term' => ['properties.name' => $name]],
+                                ['term' => ['properties_value' => $value]],
+                            ],
+                        ],
+                    ];
+                }
+            }
+
+        // dd($params);
+        //把聚合的属性传给前端
+        $properties = [];
+        //isset() 判断数组中的元素是否为 nu'l'l
+        if (isset($result['aggregations'])) {
+            //将聚合的值转成 collect 集合
+            $properties = collect($result['aggregations']['properties']
+            ['properties']['buckets'])->map(function ($bucket) {
+                return [
+                    'key' => $bucket['key'],
+                    'values' => collect($bucket['value']['buckets'])->pluck('key')->all(),
+                ];
+            })
+            ->filter(function ($property) use ($propertyFilters) {
+                // 过滤掉只剩下一个值 或者 已经在筛选条件里的属性
+                return count($property['values']) > 1 && !isset($propertyFilters[$property['key']]) ;
+                });
+        }
+
 
         // 通过 collect 函数将返回结果转为集合，并通过集合的 pluck 方法取到返回的商品 ID 数组
         $productIds = collect($result['hits']['hits'])->pluck('_id')->all();
@@ -167,7 +265,8 @@ class  ProductsPository implements ProductsPositoryInterface
             'search' => $search,
             'order' => $order,
             'order' => $order,
-            'category' => $category ?? null
+            'category' => $category ?? null,
+            'properties' => $properties
         ];
         return $data;
     }

@@ -26,6 +26,7 @@ class ProductsController extends Controller
     public function index(Request $request)
     {
         $products =   $this->repo->productsData($request);
+
         return view('products.index', [
             'products' => $products['products'],
             'filters' => [
@@ -33,6 +34,7 @@ class ProductsController extends Controller
                 'order' => $products['order']
             ],
             'category' => $products['category'],
+            'properties' => $products['properties'],
         ]);
     }
 
