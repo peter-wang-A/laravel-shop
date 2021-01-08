@@ -216,15 +216,13 @@ class  ProductsPository implements ProductsPositoryInterface
                             // 指明 nested 字段
                             'path'  => 'properties',
                             'query' => [
-                                ['term' => ['properties.name' => $name]],
-                                ['term' => ['properties_value' => $value]],
+                                // 将原来的两个 term 查询改成一个
+                                ['term' => ['properties.search_value' => $filter]],
                             ],
                         ],
                     ];
                 }
             }
-
-        // dd($params);
         //把聚合的属性传给前端
         $properties = [];
         //isset() 判断数组中的元素是否为 nu'l'l

@@ -104,9 +104,7 @@ class Product extends Model
 
         //取出需要的属性属性
         $arr['properties'] = $this->properties->map(function (ProductProperty $pro) {
-            return Arr::only($pro->toArray(), [
-                'name', 'value'
-            ]);
+            return array_merge(Arr::only($pro->toArray(), ['name', 'value']), ['search_value' => $pro->name . ':' . $pro->value]);
         });
 
         return $arr;
