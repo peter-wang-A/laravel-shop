@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductSku;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\SearchBuilders\ProductsSearchBuilder;
 
 class  ProductsPository implements ProductsPositoryInterface
 {
@@ -77,167 +78,68 @@ class  ProductsPository implements ProductsPositoryInterface
         $page = $request->input('page', 1);
         $perPage = 16; // 每页显示多少条数据
 
-        //构建查询
-        $params = [
-            'index' => 'products',
-            'body' => [
-                'from' => ($page - 1) * $perPage, // 通过当前页数与每页数量计算偏移值
-                'size' => $perPage,
-                'query' => [
-                    'bool' => [
-                        'filter' => [
-                            ['term' => ['on_sale' => true]]
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
-        //是否有提交 Order 参数，如果有就赋值给 $order 变量
-        // order 参数用来控制商品的排序规则
-        if ($order = $request->input('order', '')) {
-            //是否以字符串 _asc 或者 _desc 结尾
-            if (preg_match('/^(.+)_(asc|desc)$/', $order, $m)) {
-                if (in_array($m[1], ['price', 'rating', 'sold_count'])) {
-                    $params['body']['sort'] = [[$m[1] => $m[2]]];
-                }
-            }
-        }
+        //  新建查询构造器对象，设置只搜索上架商品，设置分页
+        $builder = (new ProductsSearchBuilder())->onSale()->paginate($perPage, $page);
 
         //类目筛选
         $categoryId = $request->input('category_id');
         if ($categoryId && $category = Category::find($categoryId)) {
-            if ($category->is_directory) {
-                // 如果是一个父类目，则使用 category_path 来筛选
-                $params['body']['query']['bool']['filter'][] = [
-                    'prefix' => ['category_path' => $category->path . $category->id . '-']
-                ];
-            } else {
-                // 否则直接通过 category_id 筛选
-                $params['body']['query']['bool']['filter'][] = ['term' => ['category_id' => $category->id]];
-            }
+            // 调用查询构造器的类目筛选
+            $builder->category($category);
         }
 
         //关键字搜索
         if ($search = $request->input('search', '')) {
-
+            //把空值除外
             $keywords = array_filter(explode(' ', $search));
-            $params['body']['query']['bool']['must'] = [];
+            $builder->keywords($keywords);
+        }
 
-            foreach ($keywords as $keyword) {
-                $params['body']['query']['bool']['must'] = [
-                    'multi_match' => [
-                        'query' => $keyword,
-                        'fields' => [
-                            'title^2',
-                            'long_title^2',
-                            'description_title',
-                            'properties_value',
-                            'skus_title',
-                            'skus_description',
-                            'category^2',
-                        ]
-                    ]
-                ];
+        // 调用查询构造器的分面搜索
+        if ($search || isset($category)) {
+            $builder->aggregatePropterties();
+        }
+
+        //属性筛选
+        $propertyFilters  = [];
+        // 从用户请求参数获取 filters
+        if ($filterString = $request->input('filters')) {
+            $filterArray = explode('|', $filterString);
+            foreach ($filterArray as $filter) {
+                list($name, $value) = $filter;
+                // 将用户筛选的属性添加到数组中
+                $propertyFilters[$name] = $value;
+                $builder->propertyFilter($name, $value);
             }
         }
 
+        //排序
+        if ($order = $request->input('order', '')) {
+            if (preg_match('/^(.+)_(asc|desc)$/', $order, $m)) {
+                if (in_array($m[1], ['price', 'sold_count', 'rating'])) {
+                    $builder->orderBy($m[1], $m[2]);
+                }
+            }
 
-        if ($search || isset($category)) {
-            $params['body']['aggs'] = [
-                'properties' => [
-                    'nested' => [
-                        'path' => 'properties',
-                    ],
-                    'aggs' => [
-                        'properties' => [
-                            'terms' => [
-                                'field' => 'properties.name'
-                            ],
-                            'aggs' => [
-                                'value' => [
-                                    'terms' => [
-                                        'field' => 'properties.value'
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-            ];
         }
 
         //执行搜索
-        $result = app('es')->search($params);
+        $result = app('es')->search($builder->getParams());
 
-        //按条件筛选
-        // $propertyFilters = [];
-        // if ($filterString = $request->input('filters')) {
-        //     //将获取到的字符串，用 | 切割成数组
-        //     $filterArray = explode('|', $filterString);
-        //     // 将字符串用符号 : 拆分成两部分并且分别赋值给 $name 和 $value 两个变量
-        //     foreach ($filterArray as $filter) {
-        //         list($name, $value) = explode(':', $filter);
-        //         // 将用户筛选的属性添加到数组中
-        //         $propertyFilters[$name] = $value;
-        //         // 添加到 filter 类型中
-        //         $params['body']['query']['bool']['filter'][] = [
-        //             // 由于我们要筛选的是 nested 类型下的属性，因此需要用 nested 查询
-        //             'nested' => [
-        //                 // 指明 nested 字段
-        //                 'path' => 'properties',
-        //                 'query' => [
-        //                     ['term' => ['properties.name' => $name]],
-        //                     ['term' => ['properties.value' => $value]],
-        //                 ]
-        //             ]
-        //         ];
-
-        //     }
-        //     // dd($params);
-        // }
-
-        $propertyFilters  = [];
-             // 从用户请求参数获取 filters
-             if ($filterString = $request->input('filters')) {
-                // 将获取到的字符串用符号 | 拆分成数组
-                $filterArray = explode('|', $filterString);
-                foreach ($filterArray as $filter) {
-                    // 将字符串用符号 : 拆分成两部分并且分别赋值给 $name 和 $value 两个变量
-                    list($name, $value) = explode(':', $filter);
-
-                      // 将用户筛选的属性添加到数组中
-                        $propertyFilters[$name] = $value;
-
-                    // 添加到 filter 类型中
-                    $params['body']['query']['bool']['filter'][] = [
-                        // 由于我们要筛选的是 nested 类型下的属性，因此需要用 nested 查询
-                        'nested' => [
-                            // 指明 nested 字段
-                            'path'  => 'properties',
-                            'query' => [
-                                // 将原来的两个 term 查询改成一个
-                                ['term' => ['properties.search_value' => $filter]],
-                            ],
-                        ],
-                    ];
-                }
-            }
         //把聚合的属性传给前端
         $properties = [];
         //isset() 判断数组中的元素是否为 nu'l'l
         if (isset($result['aggregations'])) {
             //将聚合的值转成 collect 集合
-            $properties = collect($result['aggregations']['properties']
-            ['properties']['buckets'])->map(function ($bucket) {
+            $properties = collect($result['aggregations']['properties']['properties']['buckets'])->map(function ($bucket) {
                 return [
                     'key' => $bucket['key'],
                     'values' => collect($bucket['value']['buckets'])->pluck('key')->all(),
                 ];
             })
-            ->filter(function ($property) use ($propertyFilters) {
-                // 过滤掉只剩下一个值 或者 已经在筛选条件里的属性
-                return count($property['values']) > 1 && !isset($propertyFilters[$property['key']]) ;
+                ->filter(function ($property) use ($propertyFilters) {
+                    // 过滤掉只剩下一个值 或者 已经在筛选条件里的属性
+                    return count($property['values']) > 1 && !isset($propertyFilters[$property['key']]);
                 });
         }
 
