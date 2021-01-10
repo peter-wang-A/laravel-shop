@@ -109,7 +109,7 @@ class  ProductsPository implements ProductsPositoryInterface
                 list($name, $value) = $filter;
                 // 将用户筛选的属性添加到数组中
                 $propertyFilters[$name] = $value;
-                $builder->propertyFilter($name, $value);
+                $builder->propertyFilter($name, $value,'filter');
             }
         }
 

@@ -107,9 +107,9 @@ class ProductsSearchBuilder
     }
 
     //添加一个商品属性筛选条件
-    public function propertyFilter($name, $value)
+    public function propertyFilter($name, $value, $type)
     {
-        $this->paramss['body']['query']['bool']['filter'][] = [
+        $this->paramss['body']['query']['bool'][$type][] = [
             'nested' => [
                 'path' => 'pro[erties',
                 'query' => [
@@ -117,6 +117,14 @@ class ProductsSearchBuilder
                 ]
             ]
         ];
+
+        return $this;
+    }
+
+    // 设置 minimum_should_match 参数
+    public function miniShouldMatch($count)
+    {
+        $this->params['body']['query']['bool']['minimum_should_match'] = (int)$count;
 
         return $this;
     }
