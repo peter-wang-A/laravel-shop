@@ -13,6 +13,7 @@ use App\Models\ProductSku;
 use App\Services\CartService;
 use App\Services\CategoryService;
 use App\SearchBuilders\ProductsSearchBuilder;
+use App\Services\ProductService;
 
 class ProductsController extends Controller
 {
@@ -44,35 +45,10 @@ class ProductsController extends Controller
     //商品详情页面
     public function show(Product $product, Request $request)
     {
-        // 商品推荐
-        // 创建一个查询构造器，只搜索上架的商品，取搜索结果的前 4 个商品
-        $builder = (new ProductsSearchBuilder())->onSale()->paginate(4, 1);
 
-        //遍历当前商品属性
-        foreach ($product->properties as $property) {
-
-            $builder->propertyFilter($property->name, $property->value, 'should');
-        }
-        //至少匹配一半的属性，ceil 向上舍入证数
-        $builder->miniShouldMatch(ceil(count($product->properties) / 2));
-
-        $params = $builder->getParams();
-
-        // 同时将当前商品的 ID 排除
-        $params['body']['query']['bool']['must_not'] = [['term' => ['_id' => $product->id]]];
-
-        //搜索数据
-        $result = app('es')->search($params);
-
-        //取出返回数据
-        $similarProductIds = collect($result['hits']['hits'])->pluck('_id')->all();
-        // dd(join(',',$similarProductIds));
-        $similarProducts = Product::query()
-            ->where('id', $similarProductIds)
-            //使用原生方法差排序
-            ->orderByRaw(sprintf("FIND_IN_SET(id, '%s')", join(',', $similarProductIds)))
-            ->get();
-
+        $similarProductIds = (new ProductService)->getSimilarProductIds($product, 4);
+        // 根据 Elasticsearch 搜索出来的商品 ID 从数据库中读取商品数据
+        $similarProducts   = Product::query()->byIds($similarProductIds)->get();
 
         // 判断商品是否已经上架，如果没有上架则抛出异常。
         if (!$product->on_sale) {
@@ -97,7 +73,7 @@ class ProductsController extends Controller
             'product' => $product,
             'favored' => $favored,
             'reviews' => $reviews,
-            'similar' => $similarProducts,
+            'similar' => $similarProducts ?? [],
         ]);
     }
 

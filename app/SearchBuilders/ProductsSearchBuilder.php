@@ -111,7 +111,7 @@ class ProductsSearchBuilder
     {
         $this->paramss['body']['query']['bool'][$type][] = [
             'nested' => [
-                'path' => 'pro[erties',
+                'path' => 'properties',
                 'query' => [
                     'term' => ['properties.search_value' => $name . ':' . $value]
                 ]

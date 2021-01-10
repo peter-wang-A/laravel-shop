@@ -48,6 +48,13 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    //定义作用域
+    public function scopeByIds($query, $ids)
+    {
+        return $query->whereIn('id', $ids)
+            ->orderByRaw(sprintf("FIND_IN_SET(id,'%s')", join(',', $ids)));
+    }
+
     //定义一个查询构造器，把相同的属性名的属性值单独取出
     public function getGroupPropertiesAttribute()
     {

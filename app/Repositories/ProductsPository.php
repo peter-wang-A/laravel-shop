@@ -109,7 +109,7 @@ class  ProductsPository implements ProductsPositoryInterface
                 list($name, $value) = $filter;
                 // 将用户筛选的属性添加到数组中
                 $propertyFilters[$name] = $value;
-                $builder->propertyFilter($name, $value,'filter');
+                $builder->propertyFilter($name, $value, 'filter');
             }
         }
 
@@ -120,7 +120,6 @@ class  ProductsPository implements ProductsPositoryInterface
                     $builder->orderBy($m[1], $m[2]);
                 }
             }
-
         }
 
         //执行搜索
@@ -147,11 +146,8 @@ class  ProductsPository implements ProductsPositoryInterface
         // 通过 collect 函数将返回结果转为集合，并通过集合的 pluck 方法取到返回的商品 ID 数组
         $productIds = collect($result['hits']['hits'])->pluck('_id')->all();
         // 通过 whereIn 方法从数据库中读取商品数据
-        $products = Product::query()
-            ->whereIn('id', $productIds)
-            // orderByRaw 可以让我们用原生的 SQL 来给查询结果排序
-            ->orderByRaw(sprintf("FIND_IN_SET(id, '%s')", join(',', $productIds)))
-            ->get();
+        // byIds 是模型定义的公共方法
+        $products = Product::query()->byIds($productIds)->get();
 
         // 返回一个 LengthAwarePaginator 分页对象
         /**
