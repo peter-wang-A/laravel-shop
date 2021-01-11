@@ -13,7 +13,7 @@ class SyncProducts extends Command
      *
      * @var string
      */
-    protected $signature = 'es:sync-products';
+    protected $signature = 'es:sync-products {--index=products}';
 
     /**
      * The console command description.
@@ -54,12 +54,14 @@ class SyncProducts extends Command
                     // 给每一条 es 数据指定 ID 及对应的 es 索引(数据库表名)
                     $req['body'][] = [
                         'index' => [
-                            '_index' => 'products',
+                            // 从参数中读取索引名称
+                            '_index' =>$this->option('index'),
                             '_id' => $data['id']
                         ]
                     ];
 
                     $req['body'][] = $data;
+
                 }
 
                 try {
